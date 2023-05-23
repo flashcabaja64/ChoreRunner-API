@@ -13,15 +13,22 @@ const householdsRouter = require('./households/households-router');
 
 const app = express();
 
-const { CLIENT_ORIGIN } = require('./config');
 const morganSetting = process.env.NODE_ENV === 'production' ? 'tiny' : 'common';
+
+let whitelist = ['https://chore-runner-client.vercel.app/', 'https://chore-runner-client.vercel.app']
+let corsOptions = {
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  }
+}
+
 app.use(morgan(morganSetting));
 app.use(helmet());
-app.use(
-  cors({
-    origin: CLIENT_ORIGIN
-  })
-);
+app.use(cors(corsOptions));
 
 app.get('/', (req, res) => {
   res.send('Hallo, Textbaustein!');
